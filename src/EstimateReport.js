@@ -13,9 +13,10 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
   if(page)pdf.addPage();page++;
   pdf.setFillColor(...navy);pdf.rect(0,0,W,24,'F');
   txt('BUILD ESTIMATE',margin,11,15,true,[255,255,255]);
+  txt('Created by Chandan Sahu',right,11,8,true,[255,255,255],{align:'right'});
   txt('CONSTRUCTION ESTIMATION & COSTING',margin,18,8,false,[211,226,244]);
   pdf.setDrawColor(220,228,238);pdf.line(margin,281,right,281);
-  txt('Preliminary estimate  |  For educational planning only',margin,287,8,false,gray);
+  txt('Prepared by Chandan Sahu  |  Preliminary educational estimate',margin,287,8,false,gray);
   txt('Page '+page,right,287,8,false,gray,{align:'right'});
   y=34;
  };
@@ -33,6 +34,8 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
  wrap('Item-wise material quantities, indicative rates and preliminary construction budget.',margin,178,9);y+=5;
  heading('01  PROJECT INFORMATION');
  pair('Project',String(project||'Untitled project').slice(0,65));
+ pair('Prepared by','Chandan Sahu');
+ pair('Discipline','Civil Engineering');
  pair('Report date',new Date().toLocaleDateString('en-IN'));
  pair('Plan length x width',number(dim.length)+' m x '+number(dim.width)+' m');
  pair('Number of floors',String(dim.floors));
