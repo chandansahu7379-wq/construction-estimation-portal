@@ -17,14 +17,16 @@ function App(){
  const[include,setInclude]=useState({concrete:true,steel:true,bricks:true,plaster:true,paint:true,tiles:true,excavation:true,waterproofing:true});
  const change=(k,v)=>setDim(p=>({...p,[k]:v}));
  useEffect(()=>{
-  try{const saved=JSON.parse(localStorage.getItem('buildestimate-project-v1')||'null');if(saved){if(saved.project)setProject(saved.project);if(saved.dim)setDim(p=>({...p,...saved.dim}));if(saved.rates)setRates(p=>({...p,...saved.rates}));if(saved.extras)setExtras(p=>({...p,...saved.extras}));if(saved.include)setInclude(p=>({...p,...saved.include}));}}catch{}
+  try{const saved=JSON.parse(localStorage.getItem('buildestimate-project-v1')||'null');if(saved){if(saved.project)setProject(saved.project);if(saved.dim)setDim(p=>({...p,...saved.dim}));if(saved.rates)setRates(p=>({...p,...saved.rates}));if(saved.extras)setExtras(p=>({...p,...saved.extras}));if(saved.include)setInclude(p=>({...p,...saved.include}));}}catch{}setStorageLoaded(true);
  },[]);
  useEffect(()=>{try{localStorage.setItem('buildestimate-project-v1',JSON.stringify({project,dim,rates,extras,include}));}catch{}},[storageLoaded,project,dim,rates,extras,include]);
  const calc=useMemo(()=>{
   const d=Object.fromEntries(Object.entries(dim).map(([k,v])=>[k,Math.max(0,Number(v)||0)]));
   const area=d.length*d.width,perimeter=2*(d.length+d.width),floorCount=Math.max(1,Math.floor(d.floors));
   const grossWall=perimeter*d.height*floorCount,netWall=Math.max(0,grossWall-Math.min(perimeter*d.height,d.openings)*floorCount);
-  const wallVol=netWall*d.wallThickness,slabVol=area*d.slabThickness*floorCount;
+  const grossPartitions=d.partitionLength*d.height*floorCount;
+  const netPartitions=Math.max(0,grossPartitions-Math.min(grossPartitions,d.partitionOpenings*floorCount));
+  const wallVol=netWall*d.wallThickness+netPartitions*d.partitionThickness,slabVol=area*d.slabThickness*floorCount;
   const concrete=slabVol+d.beamVolume+d.columnVolume; // measured beam/column volumes entered separately, total for entire project
   const steel=concrete*d.steelDensity; // editable conceptual kg per m3; not a bar bending schedule
   const bricks=wallVol*d.bricksPerM3;
