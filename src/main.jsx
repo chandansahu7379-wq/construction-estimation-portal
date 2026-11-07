@@ -19,7 +19,7 @@ function App(){
  useEffect(()=>{
   try{const saved=JSON.parse(localStorage.getItem('buildestimate-project-v1')||'null');if(saved){if(saved.project)setProject(saved.project);if(saved.dim)setDim(p=>({...p,...saved.dim}));if(saved.rates)setRates(p=>({...p,...saved.rates}));if(saved.extras)setExtras(p=>({...p,...saved.extras}));if(saved.include)setInclude(p=>({...p,...saved.include}));}}catch{}setStorageLoaded(true);
  },[]);
- useEffect(()=>{try{localStorage.setItem('buildestimate-project-v1',JSON.stringify({project,dim,rates,extras,include}));}catch{}},[storageLoaded,project,dim,rates,extras,include]);
+ useEffect(()=>{if(!storageLoaded)return;try{localStorage.setItem('buildestimate-project-v1',JSON.stringify({project,dim,rates,extras,include}));}catch{}},[storageLoaded,project,dim,rates,extras,include]);
  const calc=useMemo(()=>{
   const d=Object.fromEntries(Object.entries(dim).map(([k,v])=>[k,Math.max(0,Number(v)||0)]));
   const area=d.length*d.width,perimeter=2*(d.length+d.width),floorCount=Math.max(1,Math.floor(d.floors));
