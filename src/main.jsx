@@ -9,6 +9,7 @@ const fmt=n=>new Intl.NumberFormat('en-IN',{maximumFractionDigits:2}).format(n);
 const money=n=>'₹'+fmt(n);
 function App(){
  const[tab,setTab]=useState('estimate');
+ const[storageLoaded,setStorageLoaded]=useState(false);
  const[project,setProject]=useState('College Construction Project');
  const[dim,setDim]=useState({length:10,width:8,floors:1,height:3,wallThickness:0.23,openings:15,partitionLength:0,partitionThickness:0.115,partitionOpenings:0,slabThickness:0.125,beamVolume:0,columnVolume:0,steelDensity:95,bricksPerM3:500,plasterSides:2,paintCoats:2,excavationLength:0,excavationWidth:0,excavationDepth:0,waterproofArea:0});
  const[rates,setRates]=useState(initialRates);
@@ -18,7 +19,7 @@ function App(){
  useEffect(()=>{
   try{const saved=JSON.parse(localStorage.getItem('buildestimate-project-v1')||'null');if(saved){if(saved.project)setProject(saved.project);if(saved.dim)setDim(p=>({...p,...saved.dim}));if(saved.rates)setRates(p=>({...p,...saved.rates}));if(saved.extras)setExtras(p=>({...p,...saved.extras}));if(saved.include)setInclude(p=>({...p,...saved.include}));}}catch{}
  },[]);
- useEffect(()=>{try{localStorage.setItem('buildestimate-project-v1',JSON.stringify({project,dim,rates,extras,include}));}catch{}},[project,dim,rates,extras,include]);
+ useEffect(()=>{try{localStorage.setItem('buildestimate-project-v1',JSON.stringify({project,dim,rates,extras,include}));}catch{}},[storageLoaded,project,dim,rates,extras,include]);
  const calc=useMemo(()=>{
   const d=Object.fromEntries(Object.entries(dim).map(([k,v])=>[k,Math.max(0,Number(v)||0)]));
   const area=d.length*d.width,perimeter=2*(d.length+d.width),floorCount=Math.max(1,Math.floor(d.floors));
