@@ -11,25 +11,31 @@ const parseOverallDimensions=text=>{
  const wm=t.match(/(?:overall\s+)?width\s*[:=]\s*(\d+(?:\.\d+)?)\s*(?:m|metres?|meters?)\b/i);
  return lm&&wm?{length:Number(lm[1]),width:Number(wm[1]),source:lm[0]+'; '+wm[0]}:null;
 };
+
 const parseRoomDimensions=text=>{
- const t=text.replace(/\\s+/g,' ').replace(/[×✕]/g,'x');
- const pattern=/\\b(LIVING\\s+ROOM|BEDROOM\\s*\\d+|KITCHEN|BATH\\s*\\/\\s*WC|BATHROOM|TOILET|DINING\\s+ROOM)\\s+(\\d+(?:\\.\\d+)?)\\s*(?:m)?\\s*x\\s*(\\d+(?:\\.\\d+)?)\\s*m?\\b/gi;
+ const t=text.replace(/\s+/g,' ').replace(/[×✕]/g,'x');
+ const pattern=/\b(LIVING\s+ROOM|BEDROOM\s*\d+|KITCHEN|BATH\s*\/\s*WC|BATHROOM|TOILET|DINING\s+ROOM)\s+(\d+(?:\.\d+)?)\s*(?:m)?\s*x\s*(\d+(?:\.\d+)?)\s*m?\b/gi;
  const found=[];let match;
  while((match=pattern.exec(t))!==null){
-  const name=match[1].replace(/\\s+/g,' ').replace(/\\b\\w/g,c=>c.toUpperCase());
+  const name=match[1].replace(/\s+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   const length=Number(match[2]),width=Number(match[3]);
-  if(length>0&&width>0&&length<=100&&width<=100&&!found.some(r=>r.name.toLowerCase()===name.toLowerCase()))
-   found.push({id:Date.now()+Math.random(),name,length:String(length),width:String(width),openings:'0'});
+  if(length>0&&width>0&&length<=100&&width<=100&&!found.some(r=>r.name.toLowerCase()===name.toLowerCase())){
+   found.push({id:name+'-'+found.length,name,length:String(length),width:String(width),openings:'0'});
+  }
  }
  return found;
 };
-const blankRoom=()=>({id:Date.now()+Math.random(),name:'Room',length:'',width:'',openings:'0'});
+const blankRoom=()=>({id:'room-'+Date.now()+'-'+Math.random(),name:'Room',length:'',width:'',openings:'0'});
+
 export default function PlanUpload({onDimensions,onTakeoff}){
  const[file,setFile]=useState(null),[preview,setPreview]=useState('');
  const[length,setLength]=useState(''),[width,setWidth]=useState('');
  const[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[detected,setDetected]=useState('');
  const[rooms,setRooms]=useState([blankRoom()]);
- const roomTotals=rooms.reduce((a,r)=>{const l=Math.max(0,Number(r.length)||0),w=Math.max(0,Number(r.width)||0);a.area+=l*w;a.perimeter+=2*(l+w);a.openings+=Math.max(0,Number(r.openings)||0);return a},{area:0,perimeter:0,openings:0});
+ const roomTotals=rooms.reduce((a,r)=>{
+  const l=Math.max(0,Number(r.length)||0),w=Math.max(0,Number(r.width)||0);
+  a.area+=l*w;a.perimeter+=2*(l+w);a.openings+=Math.max(0,Number(r.openings)||0);return a;
+ },{area:0,perimeter:0,openings:0});
  const updateRoom=(id,key,value)=>setRooms(old=>old.map(r=>r.id===id?{...r,[key]:value}:r));
  const choose=async e=>{
   const f=e.target.files?.[0];if(!f)return;
@@ -41,7 +47,10 @@ export default function PlanUpload({onDimensions,onTakeoff}){
   setBusy(true);
   try{
    const pdf=await pdfjs.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise,texts=[];
-   for(let i=1;i<=Math.min(pdf.numPages,5);i++){const page=await pdf.getPage(i);texts.push((await page.getTextContent()).items.map(x=>x.str||'').join(' '))}
+   for(let i=1;i<=Math.min(pdf.numPages,5);i++){
+    const page=await pdf.getPage(i);
+    texts.push((await page.getTextContent()).items.map(x=>x.str||'').join(' '));
+   }
    const fullText=texts.join(' ');
    const match=parseOverallDimensions(fullText);
    const foundRooms=parseRoomDimensions(fullText);
@@ -49,11 +58,11 @@ export default function PlanUpload({onDimensions,onTakeoff}){
    if(match&&match.length>0&&match.width>0&&match.length<=10000&&match.width<=10000){
     setLength(String(match.length));setWidth(String(match.width));setDetected(match.source);
     setMessage(foundRooms.length
-     ? `Found overall dimensions and ${foundRooms.length} room dimension(s) in selectable PDF text. Verify all values against the drawing before applying.`
-     : 'Overall dimensions found. Room dimensions were not detected; verify the drawing and enter missing room sizes.');
+     ?'Found overall dimensions and '+foundRooms.length+' room dimension(s) in selectable PDF text. Verify all values against the drawing before applying.'
+     :'Overall dimensions found. Room dimensions were not detected; verify the drawing and enter missing room sizes.');
    }else setMessage(foundRooms.length
-    ? `Found ${foundRooms.length} room dimension(s), but no clear overall dimensions. Verify and enter the overall size.`
-    : 'No clear dimensions found. Scanned PDFs need OCR; check the drawing and enter missing dimensions manually.');
+    ?'Found '+foundRooms.length+' room dimension(s), but no clear overall dimensions. Verify and enter the overall size.'
+    :'No clear dimensions found. Scanned PDFs need OCR; check the drawing and enter missing dimensions manually.');
   }catch{setMessage('Could not read PDF text. Preview is available; enter dimensions manually.')}
   finally{setBusy(false)}
  };
@@ -90,6 +99,6 @@ export default function PlanUpload({onDimensions,onTakeoff}){
   <div className="notice" style={{marginTop:14}}><strong>Room schedule totals (one floor)</strong><p>Floor area: {roomTotals.area.toFixed(2)} m² · Room perimeter total: {roomTotals.perimeter.toFixed(2)} m · Internal openings entered: {roomTotals.openings.toFixed(2)} m²</p></div>
   <button className="primary" onClick={applyRoomTakeoff}>Apply room schedule to estimate</button>
   {message&&<p role="status" className="muted">{message}</p>}
-  <p className="muted" style={{marginTop:12}}>Limitations: this test reads selectable PDF text and common room labels only. It does not yet detect room geometry, walls, doors or windows from drawing lines, and scanned plans still need OCR. Verify every detected value before using the estimate. Partition length is an approximation derived from room perimeters and the overall building perimeter; verify it against the drawing before using the estimate.</p>
+  <p className="muted" style={{marginTop:12}}>Limitations: this reads selectable PDF text and common room labels only. It does not yet detect room geometry, walls, doors or windows from drawing lines, and scanned plans still need OCR. Verify every detected value before using the estimate. Partition length is an approximation derived from room perimeters and the overall building perimeter; verify it against the plan.</p>
  </section>;
 }
