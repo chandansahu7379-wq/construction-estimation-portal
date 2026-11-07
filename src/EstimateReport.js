@@ -72,14 +72,14 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
  const notes=[
   'Slab RCC volume = plan area x slab thickness x floor count. Entered beam and column volumes are added separately for all floors; avoid overlap/double-counting.',
   'Steel is an assumed kg per cubic metre of RCC, not a reinforcement design or bar bending schedule.',
-  'Brickwork uses net external wall area x wall thickness x editable bricks-per-cubic-metre factor. Internal partitions are not measured.',
-  'Plaster is net external wall area x selected faces. Paint quantity is plaster area x number of coats.',
+  'Brickwork includes net external wall volume plus manually entered internal partition length x height x thickness. Internal partition openings are deducted using the entered area; verify all dimensions.',
+  'Plaster includes external wall area x selected faces plus both faces of internal partitions. Paint quantity is plaster area x number of coats.',
   'Excavation is entered length x width x depth. Waterproofing uses the entered treated area.',
   'Rates are editable sample values, not live supplier quotations. All quantities and costs are indicative.'
  ];
  notes.forEach((n,i)=>{ensure(9);txt(String(i+1)+'.',margin,y,8,true,blue);wrap(n,margin+8,172,8);y+=2});
  heading('05  IMPORTANT EXCLUSIONS');
- wrap('Detailed foundations and footing design, internal walls, staircases, electrical and plumbing work, doors, windows, transport, GST, approvals and professional fees are not comprehensively included. User-entered beam and column volumes are only approximate quantities.',margin,178,8);
+ wrap('Detailed foundations and footing design, staircases, electrical and plumbing work, doors, windows, transport, GST, approvals and professional fees are not comprehensively included. Internal partition quantities are based only on user-entered total length, height and thickness. User-entered beam and column volumes are only approximate quantities.',margin,178,8);
  y+=5;wrap('Verify all dimensions, specifications, structural drawings, site conditions, quantities and local supplier rates with a qualified engineer or quantity surveyor before construction.',margin,178,8);
  const safe=(String(project||'project').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,45)||'project');
  pdf.save(safe+'-estimation-report.pdf');
