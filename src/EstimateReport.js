@@ -48,7 +48,7 @@ export function downloadEstimateReport({project,dim,rates,extras,calc,roomTakeof
  pair('Internal partition net area',number(calc.netPartitions)+' m²');
  pair('Total estimated wall volume',number(calc.wallVol)+' m³');
  pair('Room schedule floor area',number(calc.roomArea||0)+' m²');
- pair('Approx. internal partition length',number(calc.measuredPartitionLength||0)+' m');
+ pair('Measured internal partition length',number(calc.measuredPartitionLength||0)+' m');
  pair('Steel factor',number(dim.steelDensity)+' kg per m³ RCC');
  if(roomTakeoff.length){
   heading('03  ROOM-WISE FLOOR SCHEDULE');
@@ -86,14 +86,14 @@ export function downloadEstimateReport({project,dim,rates,extras,calc,roomTakeof
  const notes=[
   'Slab RCC volume = plan area x slab thickness x floor count. Entered beam and column volumes are added separately for all floors; avoid overlap/double-counting.',
   'Steel is an assumed kg per cubic metre of RCC, not a reinforcement design or bar bending schedule.',
-  'Brickwork includes net external wall volume plus internal partition volume estimated from the room schedule or manually entered partition length. Internal partition openings are deducted using entered area; verify dimensions.',
+  'Brickwork includes net external wall volume plus internal partition volume based on the manually measured internal partition length. Room perimeters are not used to infer wall layout. Internal partition openings are deducted using entered area; verify dimensions.',
   'Plaster includes external wall area x selected faces plus both faces of internal partitions. Paint quantity is plaster area x number of coats.',
   'Excavation is entered length x width x depth. Waterproofing uses the entered treated area.',
-  'When a room schedule is supplied, floor tile area uses the sum of entered room areas. Approximate internal partition length is derived from room perimeters and the overall building perimeter; verify it against the actual plan. Rates are editable sample values, not live supplier quotations. All quantities and costs are indicative.'
+  'When a room schedule is supplied, floor tile area uses the sum of entered room areas. Internal partition length must be measured from the actual plan and entered manually. Room perimeters cannot reliably identify wall layout. Rates are editable sample values, not live supplier quotations. All quantities and costs are indicative.'
  ];
  notes.forEach((n,i)=>{ensure(9);txt(String(i+1)+'.',margin,y,8,true,blue);wrap(n,margin+8,172,8);y+=2});
  heading('07  IMPORTANT EXCLUSIONS');
- wrap('Detailed foundations and footing design, staircases, electrical and plumbing work, doors, windows, transport, GST, approvals and professional fees are not comprehensively included. Room dimensions are entered manually from the drawing. The room schedule does not automatically recognize walls, doors or windows from the uploaded image/PDF. User-entered beam and column volumes are only approximate quantities.',margin,178,8);
+ wrap('Detailed foundations and footing design, staircases, electrical and plumbing work, doors, windows, transport, GST, approvals and professional fees are not comprehensively included. Room dimensions are used for floor area only. Internal partition length must be measured from the drawing and entered manually. OCR does not automatically recognize wall geometry, doors or windows from the uploaded image/PDF. User-entered beam and column volumes are only approximate quantities.',margin,178,8);
  y+=5;wrap('Verify all dimensions, specifications, structural drawings, site conditions, quantities and local supplier rates with a qualified engineer or quantity surveyor before construction.',margin,178,8);
  const safe=(String(project||'project').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,45)||'project');
  pdf.save(safe+'-estimation-report.pdf');
