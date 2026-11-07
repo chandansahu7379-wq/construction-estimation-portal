@@ -4,7 +4,7 @@ import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import {createWorker} from 'tesseract.js';
 pdfjs.GlobalWorkerOptions.workerSrc=workerUrl;
 
-const tidy=s=>String(s||'').replace(/[×✕]/g,'x').replace(/,/g,'.').replace(/\\s+/g,' ').trim();
+const tidy=s=>String(s||'').replace(/[×✕]/g,'x').replace(/,/g,'.').replace(/\s+/g,' ').trim();
 const num='(\\d{1,4}(?:\\.\\d{1,3})?)';
 const pair=new RegExp(num+'\\s*(m|mm)?\\s*x\\s*'+num+'\\s*(m|mm)?','i');
 const metres=(v,u)=>Number(v)/(String(u||'').toLowerCase()==='mm'?1000:1);
@@ -19,13 +19,13 @@ function parseOverall(text){
  return null;
 }
 function parseRooms(text){
- const lines=String(text||'').split(/\\r?\\n/).map(tidy).filter(Boolean),out=[];
+ const lines=String(text||'').split(/\r?\n/).map(tidy).filter(Boolean),out=[];
  const aliases=[
   ['LIVING / DINING',/living.*(dining)|(dining).*living/i],
-  ['LIVING ROOM',/living/i],['BEDROOM 1',/bed\\s*room\\s*1|bedroom\\s*1|bed\\s*1/i],
-  ['BEDROOM 2',/bed\\s*room\\s*2|bedroom\\s*2|bed\\s*2/i],['BEDROOM 3',/bed\\s*room\\s*3|bedroom\\s*3|bed\\s*3/i],
-  ['KITCHEN',/kitchen/i],['TOILET 1',/toilet\\s*1|wc\\s*1/i],['TOILET 2',/toilet\\s*2|wc\\s*2/i],
-  ['TOILET',/toilet|\\bwc\\b/i],['BATHROOM',/bath/i],['UTILITY',/utility|wash\\s*area/i],['DINING ROOM',/dining/i]
+  ['LIVING ROOM',/living/i],['BEDROOM 1',/bed\s*room\\s*1|bedroom\\s*1|bed\\s*1/i],
+  ['BEDROOM 2',/bed\s*room\\s*2|bedroom\\s*2|bed\\s*2/i],['BEDROOM 3',/bed\s*room\\s*3|bedroom\\s*3|bed\\s*3/i],
+  ['KITCHEN',/kitchen/i],['TOILET 1',/toilet\s*1|wc\\s*1/i],['TOILET 2',/toilet\s*2|wc\\s*2/i],
+  ['TOILET',/toilet|\\bwc\\b/i],['BATHROOM',/bath/i],['UTILITY',/utility|wash\s*area/i],['DINING ROOM',/dining/i]
  ];
  const add=(name,m,raw)=>{
   const l=metres(m[1],m[2]),w=metres(m[3],m[4]);
