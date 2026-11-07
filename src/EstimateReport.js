@@ -41,7 +41,14 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
  pair('Number of floors',String(dim.floors));
  pair('Wall height per floor',number(dim.height)+' m');
  pair('Total indicative floor area',number(calc.area*Math.max(1,Math.floor(Math.max(0,Number(dim.floors)||0))))+' sq.m');
- heading('02  QUANTITY TAKE-OFF / BOQ');
+ heading('02  QUANTITY CALCULATION SUMMARY');
+ pair('Slab concrete volume',number(calc.slabVol)+' m³');
+ pair('Entered beam + column volume',number((Number(dim.beamVolume)||0)+(Number(dim.columnVolume)||0))+' m³');
+ pair('External wall net area',number(calc.netWall)+' m²');
+ pair('Internal partition net area',number(calc.netPartitions)+' m²');
+ pair('Total estimated wall volume',number(calc.wallVol)+' m³');
+ pair('Steel factor',number(dim.steelDensity)+' kg per m³ RCC');
+ heading('03  QUANTITY TAKE-OFF / BOQ');
  const widths=[12,75,28,20,24,21],xs=[15,27,102,130,150,174];
  const tableHead=()=>{
   ensure(12);pdf.setFillColor(...blue);pdf.rect(margin,y-6,180,11,'F');
@@ -50,7 +57,7 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
  tableHead();
  calc.rows.forEach((r,i)=>{
   const nameLines=pdf.splitTextToSize(r.name,70),h=Math.max(12,nameLines.length*4+5);
-  if(y+h>272){start();heading('02  QUANTITY TAKE-OFF / BOQ (continued)');tableHead()}
+  if(y+h>272){start();heading('03  QUANTITY TAKE-OFF / BOQ (continued)');tableHead()}
   if(i%2===0){pdf.setFillColor(246,249,252);pdf.rect(margin,y-5,180,h,'F')}
   txt(i+1,xs[0]+2,y+1,8);
   nameLines.forEach((line,j)=>txt(line,xs[1]+2,y+1+j*4,7.8));
@@ -60,7 +67,7 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
   txt(number(r.amount),right-2,y+1,8,true,navy,{align:'right'});
   y+=h;
  });
- y+=5;heading('03  COST SUMMARY');
+ y+=5;heading('04  COST SUMMARY');
  pair('Material subtotal',rupees(calc.base));
  pair('Wastage allowance ('+number(extras.wastage)+'%)',rupees(calc.wastage));
  pair('Labour allowance ('+number(extras.labour)+'%)',rupees(calc.labour));
@@ -68,7 +75,7 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
  ensure(17);pdf.setFillColor(...navy);pdf.roundedRect(margin,y-5,180,16,2,2,'F');
  txt('ESTIMATED PROJECT TOTAL',margin+5,y+5,11,true,[255,255,255]);
  txt(rupees(calc.total),right-5,y+5,12,true,[255,255,255],{align:'right'});y+=24;
- heading('04  QUANTITY BASIS & ASSUMPTIONS');
+ heading('05  QUANTITY BASIS & ASSUMPTIONS');
  const notes=[
   'Slab RCC volume = plan area x slab thickness x floor count. Entered beam and column volumes are added separately for all floors; avoid overlap/double-counting.',
   'Steel is an assumed kg per cubic metre of RCC, not a reinforcement design or bar bending schedule.',
@@ -78,7 +85,7 @@ export function downloadEstimateReport({project,dim,rates,extras,calc}){
   'Rates are editable sample values, not live supplier quotations. All quantities and costs are indicative.'
  ];
  notes.forEach((n,i)=>{ensure(9);txt(String(i+1)+'.',margin,y,8,true,blue);wrap(n,margin+8,172,8);y+=2});
- heading('05  IMPORTANT EXCLUSIONS');
+ heading('06  IMPORTANT EXCLUSIONS');
  wrap('Detailed foundations and footing design, staircases, electrical and plumbing work, doors, windows, transport, GST, approvals and professional fees are not comprehensively included. Internal partition quantities are based only on user-entered total length, height and thickness. User-entered beam and column volumes are only approximate quantities.',margin,178,8);
  y+=5;wrap('Verify all dimensions, specifications, structural drawings, site conditions, quantities and local supplier rates with a qualified engineer or quantity surveyor before construction.',margin,178,8);
  const safe=(String(project||'project').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,45)||'project');
