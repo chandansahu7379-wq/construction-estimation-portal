@@ -26,8 +26,7 @@ function App(){
   const area=d.length*d.width,perimeter=2*(d.length+d.width),floorCount=Math.max(1,Math.floor(d.floors));
   const grossWall=perimeter*d.height*floorCount,netWall=Math.max(0,grossWall-Math.min(perimeter*d.height,d.openings)*floorCount);
   const roomArea=roomTakeoff.reduce((s,r)=>s+r.length*r.width,0);
-  const roomPerimeter=roomTakeoff.reduce((s,r)=>s+2*(r.length+r.width),0);
-  const measuredPartitionLength=roomTakeoff.length?Math.max(0,(roomPerimeter-perimeter)/2):d.partitionLength;
+  const measuredPartitionLength=d.partitionLength; // Always use the partition length measured from the actual drawing; room perimeters cannot reliably determine wall layout.
   const measuredPartitionOpenings=roomTakeoff.length?roomTakeoff.reduce((s,r)=>s+r.openings,0):d.partitionOpenings;
   const grossPartitions=measuredPartitionLength*d.height*floorCount;
   const netPartitions=Math.max(0,grossPartitions-Math.min(grossPartitions,measuredPartitionOpenings*floorCount));
