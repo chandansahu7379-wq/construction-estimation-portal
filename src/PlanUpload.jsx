@@ -4,11 +4,11 @@ import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 pdfjs.GlobalWorkerOptions.workerSrc=workerUrl;
 
 const parseOverallDimensions=text=>{
- const t=text.replace(/\\s+/g,' ').replace(/[×✕]/g,'x');
- const pair=t.match(/(?:overall|plot|building|floor|plan)?\\s*(?:dimensions?|size)?\\s*[:=-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:m|metres?|meters?)?\\s*[xX]\\s*(\\d+(?:\\.\\d+)?)\\s*(?:m|metres?|meters?)\\b/i);
+ const t=text.replace(/\s+/g,' ').replace(/[×✕]/g,'x');
+ const pair=t.match(/(?:overall|plot|building|floor|plan)?\s*(?:dimensions?|size)?\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(?:m|metres?|meters?)?\s*[xX]\s*(\d+(?:\.\d+)?)\s*(?:m|metres?|meters?)\b/i);
  if(pair)return {length:Number(pair[1]),width:Number(pair[2]),source:pair[0]};
- const lm=t.match(/(?:overall\\s+)?length\\s*[:=]\\s*(\\d+(?:\\.\\d+)?)\\s*(?:m|metres?|meters?)\\b/i);
- const wm=t.match(/(?:overall\\s+)?width\\s*[:=]\\s*(\\d+(?:\\.\\d+)?)\\s*(?:m|metres?|meters?)\\b/i);
+ const lm=t.match(/(?:overall\s+)?length\s*[:=]\s*(\d+(?:\.\d+)?)\s*(?:m|metres?|meters?)\b/i);
+ const wm=t.match(/(?:overall\s+)?width\s*[:=]\s*(\d+(?:\.\d+)?)\s*(?:m|metres?|meters?)\b/i);
  return lm&&wm?{length:Number(lm[1]),width:Number(wm[1]),source:lm[0]+'; '+wm[0]}:null;
 };
 const blankRoom=()=>({id:Date.now()+Math.random(),name:'Room',length:'',width:'',openings:'0'});
